@@ -4,6 +4,27 @@ EnterCode. Is a Thing What you enter a code. if the password is good then opens 
 
 # Instructions
 
+## PART 0: Required Components
+
+Before starting, make sure you have the following parts:
+
+| Quantity | Component                                 |
+| -------- | ----------------------------------------- |
+| 1        | Arduino Uno (or compatible Arduino board) |
+| 1        | 16×2 I2C LCD Screen                       |
+| 1        | 4×4 Matrix Hex Keypad                     |
+| 1        | Breadboard                                |
+| 16       | Male-to-Male Jumper Wires (cables)        |
+| 1        | USB Cable for Arduino                     |
+
+### Component Notes
+
+* The **16×2 I2C LCD Screen** is used to display prompts, entered digits, and access messages.
+* The **4×4 Matrix Hex Keypad** is used to enter the password.
+* The **breadboard** distributes power and makes wiring easier.
+* The **16 jumper wires** are used to connect the Arduino, LCD, keypad, and breadboard together.
+* The **USB cable** is required for uploading the code and powering the Arduino.
+
 ## PART 1: Prepare Your Computer (Software)
 
 Before touching the hardware, make sure your computer is ready to talk to the Arduino:
@@ -76,60 +97,60 @@ Copy this code into the Arduino IDE and click the **Upload** button.
 #include <LiquidCrystal_I2C.h>
 #include <Keypad.h>
 
-// Initialize LCD (Address 0x27, 16 columns, 2 rows)
+// Inicjalizacja LCD (Adres 0x27, 16 kolumn, 2 wiersze)
 LiquidCrystal_I2C lcd(0x27, 16, 2);
 
-// CHOOSE YOUR PASSWORD HERE (Change "1234" to any code you prefer)
+// TUTAJ WPISZ SWOJE HASŁO
 const String CORRECT_PASSWORD = "1234";
 String enteredPassword = "";
 
-// Configure the 4x4 keypad grid layout
-const byte ROWS = 4; 
-const byte COLS = 4; 
-
+// Konfiguracja układu klawiatury 4x4
+const byte ROWS = 4;
+const byte COLS = 4;
 char hexKeypadMap[ROWS][COLS] = {
   {'1','5','9','#'},
-  {'2','6','0','#'},
+  {'2','6','0','R'},
   {'3','7','0','*'},
   {'4','8','9','*'}
 };
 
-// Map the keypad pins to Arduino Digital Pins 2 through 9
-byte rowPins[ROWS] = {2, 3, 4, 5}; 
-byte colPins[COLS] = {6, 7, 8, 9}; 
+// Mapowanie pinów klawiatury do Arduino (Piny 2 do 9)
+byte rowPins[ROWS] = {2, 3, 4, 5};
+byte colPins[COLS] = {6, 7, 8, 9};
 
 Keypad customKeypad = Keypad(makeKeymap(hexKeypadMap), rowPins, colPins, ROWS, COLS);
 
 void setup() {
-  // Turn on the LCD screen
   lcd.init();
   lcd.backlight();
-  
   showStartScreen();
 }
 
 void loop() {
-  // Read if any key is currently pressed
+  // Odczyt wciśniętego klawisza
   char customKey = customKeypad.getKey();
   
   if (customKey) {
-    if (customKey == '#') {
-      // The '#' key acts as ENTER to submit your password
+    if (customKey == '#') { 
+      // Klawisz '#' działa jako ENTER (zatwierdzenie hasła)
       checkPassword();
-    } 
-    else if (customKey == '*') {
-      // The '*' key acts as RESET to clear your typed entry
+    }
+    else if (customKey == '*') { 
+      // Klawisz '*' resetuje wpisane znaki
       enteredPassword = "";
       showStartScreen();
-    } 
-    else if (customKey != 'A' && customKey != 'B' && customKey != 'C' && customKey != 'D') {
-      // If a number key is pressed, add it to our entry string
+    }
+    else if (customKey == 'R') { 
+      // Klawisz 'R' resetuje wpis bez pokazywania ekranu ładowania (brak zawieszeń)
+      enteredPassword = "";
+      showStartScreen();
+    }
+    else if (customKey != 'B' && customKey != 'C' && customKey != 'D') {
+      // Jeśli wciśnięto cyfrę, dodaj ją do wpisanego hasła
       if (enteredPassword.length() < CORRECT_PASSWORD.length()) {
         enteredPassword += customKey;
-        
-        // This part now prints the actual typed key instead of an asterisk
-        lcd.setCursor(enteredPassword.length() - 1, 1);
-        lcd.print(customKey); 
+        // Wyświetla dokładnie ten znak, który został wciśnięty (hasło jest widoczne)
+        lcd.print(customKey);
       }
     }
   }
@@ -141,17 +162,21 @@ void checkPassword() {
     lcd.print("ACCESS GRANTED");
     lcd.setCursor(0, 1);
     lcd.print("Opening...");
-    
-    delay(5000);        // Keep it unlocked for 5 seconds
-    
+    delay(2000);
     lcd.clear();
-    lcd.print("Locking...");
-    delay(1000);
-  } else {
+    // Here You Type You message here is the 1st line
+    lcd.print("You can Edit");
+    lcd.setCursor(0, 1);
+    // And Here Is The 2nd Line 
+    lcd.print("This in the code");
+    delay(5000); 
+  } 
+  else {
     lcd.print("WRONG PASSWORD!");
     delay(2000);
   }
   
+  // Czyszczenie danych i powrót do ekranu startowego
   enteredPassword = "";
   showStartScreen();
 }
@@ -159,8 +184,9 @@ void checkPassword() {
 void showStartScreen() {
   lcd.clear();
   lcd.print("Enter code:");
-  lcd.setCursor(0, 1);
+  lcd.setCursor(0, 1); // Ustawienie kursora w drugim wierszu dla widocznych cyfr
 }
+
 
 
 ```
@@ -208,6 +234,30 @@ const String CORRECT_PASSWORD = "1234";
 Replace `"1234"` with your desired numeric code, for example:
 
 ```cpp
-const String CORRECT_PASSWORD = "9876";
+const String CORRECT_PASSWORD = "5959";
+```
+
+## Customizing the Text
+
+To change the text, edit this line:
+
+```cpp
+    // Here You Type You message here is the 1st line
+    lcd.print("You can Edit");
+    lcd.setCursor(0, 1);
+    // And Here Is The 2nd Line 
+    lcd.print("This in the code");
+    delay(5000); 
+```
+
+Replace `"1234"` with your desired numeric code, for example:
+
+```cpp
+    // Here You Type You message here is the 1st line
+    lcd.print("And I Replace");
+    lcd.setCursor(0, 1);
+    // And Here Is The 2nd Line 
+    lcd.print("The Text!");
+    delay(5000); 
 ```
 
