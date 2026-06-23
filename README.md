@@ -97,28 +97,34 @@ Copy this code into the Arduino IDE and click the **Upload** button.
 #include <LiquidCrystal_I2C.h>
 #include <Keypad.h>
 
-// Inicjalizacja LCD (Adres 0x27, 16 kolumn, 2 wiersze)
+// Initialize LCD: Address 0x27, 16 columns, 2 rows
 LiquidCrystal_I2C lcd(0x27, 16, 2);
 
-// TUTAJ WPISZ SWOJE HASŁO
+// ENTER YOUR PASSWORD HERE
 const String CORRECT_PASSWORD = "1234";
 String enteredPassword = "";
 
-// Konfiguracja układu klawiatury 4x4
+// Configure the 4x4 keypad layout
 const byte ROWS = 4;
 const byte COLS = 4;
 char hexKeypadMap[ROWS][COLS] = {
-  {'1','5','9','#'},
-  {'2','6','0','R'},
-  {'3','7','0','*'},
-  {'4','8','9','*'}
+  {'1', '5', '9', 'A'},
+  {'2', '6', '0', 'B'},
+  {'3', '7', 'C', 'R'},
+  {'4', '8', 'D', 'E'}
 };
 
-// Mapowanie pinów klawiatury do Arduino (Piny 2 do 9)
+// Map keypad pins to Arduino (Pins 2 to 9)
 byte rowPins[ROWS] = {2, 3, 4, 5};
 byte colPins[COLS] = {6, 7, 8, 9};
 
 Keypad customKeypad = Keypad(makeKeymap(hexKeypadMap), rowPins, colPins, ROWS, COLS);
+
+void showStartScreen() {
+  lcd.clear();
+  lcd.print("Enter Password:");
+  lcd.setCursor(0, 1);
+}
 
 void setup() {
   lcd.init();
@@ -127,29 +133,29 @@ void setup() {
 }
 
 void loop() {
-  // Odczyt wciśniętego klawisza
+  // Read the pressed key
   char customKey = customKeypad.getKey();
-  
+
   if (customKey) {
-    if (customKey == '#') { 
-      // Klawisz '#' działa jako ENTER (zatwierdzenie hasła)
+    if (customKey == 'A') {
+      // Key 'A' acts as ENTER to verify the password
       checkPassword();
-    }
-    else if (customKey == '*') { 
-      // Klawisz '*' resetuje wpisane znaki
+    } 
+    else if (customKey == 'E') {
+      // Key 'E' resets the entered characters and restarts screen
       enteredPassword = "";
       showStartScreen();
-    }
-    else if (customKey == 'R') { 
-      // Klawisz 'R' resetuje wpis bez pokazywania ekranu ładowania (brak zawieszeń)
+    } 
+    else if (customKey == 'R') {
+      // Key 'R' resets input quickly without full reload animation
       enteredPassword = "";
       showStartScreen();
-    }
+    } 
     else if (customKey != 'B' && customKey != 'C' && customKey != 'D') {
-      // Jeśli wciśnięto cyfrę, dodaj ją do wpisanego hasła
+      // If a character/digit is pressed, add it to the password string
       if (enteredPassword.length() < CORRECT_PASSWORD.length()) {
         enteredPassword += customKey;
-        // Wyświetla dokładnie ten znak, który został wciśnięty (hasło jest widoczne)
+        // Display the exact character pressed (visible password)
         lcd.print(customKey);
       }
     }
@@ -163,30 +169,20 @@ void checkPassword() {
     lcd.setCursor(0, 1);
     lcd.print("Opening...");
     delay(2000);
+    
     lcd.clear();
-    // Here You Type You message here is the 1st line
-    lcd.print("You can Edit");
+    // Line 1 of your custom message
+    lcd.print("Welcome Back!"); 
     lcd.setCursor(0, 1);
-    // And Here Is The 2nd Line 
-    lcd.print("This in the code");
-    delay(5000); 
-  } 
-  else {
-    lcd.print("WRONG PASSWORD!");
+    // Line 2 of your custom message
+    lcd.print("System Ready"); 
+  } else {
+    lcd.print("WRONG PASSWORD");
     delay(2000);
+    enteredPassword = "";
+    showStartScreen();
   }
-  
-  // Czyszczenie danych i powrót do ekranu startowego
-  enteredPassword = "";
-  showStartScreen();
 }
-
-void showStartScreen() {
-  lcd.clear();
-  lcd.print("Enter code:");
-  lcd.setCursor(0, 1); // Ustawienie kursora w drugim wierszu dla widocznych cyfr
-}
-
 
 
 ```
