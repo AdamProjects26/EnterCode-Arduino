@@ -250,7 +250,7 @@ To change the text, edit this line:
     delay(5000); 
 ```
 
-Replace `"1234"` with your desired numeric code, for example:
+Replace `"You Can Edit This in the code"` with your desired numeric code, for example:
 
 ```cpp
     // Here You Type You message here is the 1st line
